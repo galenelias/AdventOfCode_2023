@@ -15,10 +15,10 @@ pub fn solve(inputs: Vec<String>) {
 	let games = inputs
 		.iter()
 		.map(|line| {
-			let parts = line.split(": ").collect_vec();
-			let game_id = parts[0].split(" ").collect_vec()[1].parse::<u32>().unwrap();
+			let (game_str, pulls_str) = line.split_once(": ").unwrap();
+			let game_id = game_str.split_once(" ").unwrap().1.parse::<u32>().unwrap();
 
-			let pulls = parts[1]
+			let pulls = pulls_str
 				.split("; ")
 				.map(|pull| {
 					let cubes = pull.split(", ").collect_vec();
@@ -30,10 +30,10 @@ pub fn solve(inputs: Vec<String>) {
 					};
 
 					for cube in cubes {
-						let cube_parts = cube.split(" ").collect_vec();
-						let amount = cube_parts[0].parse::<u32>().unwrap();
+						let (amount_str, color_str) = cube.split_once(" ").unwrap();
+						let amount = amount_str.parse::<u32>().unwrap();
 
-						match cube_parts[1] {
+						match color_str {
 							"green" => pull.green = amount,
 							"red" => pull.red = amount,
 							"blue" => pull.blue = amount,
