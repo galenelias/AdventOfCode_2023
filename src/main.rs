@@ -10,6 +10,7 @@ use std::io::{self, BufRead};
 
 mod day1;
 mod day2;
+mod day3;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -55,6 +56,7 @@ fn main() {
 	match cli.day {
 		1 => day1::solve(input),
 		2 => day2::solve(input),
+		3 => day3::solve(input),
 
 		_ => println!("Oops! Day {} isn't implemented yet!", cli.day),
 	}
