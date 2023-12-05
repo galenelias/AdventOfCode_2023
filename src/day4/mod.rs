@@ -23,13 +23,7 @@ pub fn solve(inputs: Vec<String>) {
 
 	let part1 = match_counts
 		.iter()
-		.map(|matches| {
-			if matches == &0 {
-				0
-			} else {
-				1 << matches - 1
-			}
-		})
+		.map(|matches| if matches == &0 { 0 } else { 1 << matches - 1 })
 		.sum::<u32>();
 	println!("Part 1: {}", part1);
 
