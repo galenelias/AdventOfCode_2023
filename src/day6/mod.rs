@@ -20,7 +20,9 @@ pub fn solve(inputs: Vec<String>) {
 		.map(|s| s.parse::<u64>().unwrap())
 		.collect_vec();
 
-	let part1 = times.iter().zip(distances.iter())
+	let part1 = times
+		.iter()
+		.zip(distances.iter())
 		.map(|(&dist, &time)| ways_to_solve(dist, time))
 		.product::<u64>();
 	println!("Part 1: {}", part1);
