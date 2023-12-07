@@ -6,80 +6,55 @@ struct Entry {
 	bid: u64,
 }
 
-fn card_to_index(card: &char) -> usize {
-	let cards = [
-		'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
-	];
+#[derive(PartialEq)]
+enum Part {
+	Part1,
+	Part2,
+}
+
+fn card_to_index(card: &char, part: &Part) -> usize {
+	let cards = if part == &Part::Part1 {
+		[ '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', ]
+	} else {
+		[ 'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A', ]
+	};
 	cards.iter().position(|c| c == card).unwrap()
 }
 
-fn card_to_index_part2(card: &char) -> usize {
-	let cards = [
-		'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A',
-	];
-	cards.iter().position(|c| c == card).unwrap()
-}
-
-fn build_frequencies(hand: &[char]) -> [u32; 13] {
+fn build_frequencies(hand: &[char], part: &Part) -> Vec<usize> {
 	let mut freqs = [0; 13];
 	for card in hand {
-		freqs[card_to_index(card)] += 1;
-	}
-	freqs
-}
-
-fn build_frequencies_part2(hand: &[char]) -> Vec<usize> {
-	let mut freqs = [0; 13];
-	let jokers = hand.iter().filter(|&c| c == &'J').count();
-	for card in hand.iter().filter(|&c| c != &'J') {
-		freqs[card_to_index(card)] += 1;
+		freqs[card_to_index(card, part)] += 1;
 	}
 
-	let mut sorted_freqs = freqs.into_iter().sorted().rev().collect_vec();
-	sorted_freqs[0] += jokers;
-	return sorted_freqs;
+	if part == &Part::Part1 {
+		return freqs.into_iter().sorted().rev().collect_vec();
+	} else {
+		let jokers = freqs[card_to_index(&'J', part)];
+		freqs[card_to_index(&'J', part)] = 0;
+
+		let mut sorted_freqs = freqs.into_iter().sorted().rev().collect_vec();
+		sorted_freqs[0] += jokers;
+		return sorted_freqs;
+	}
 }
 
-fn compare_hands_part1(hand1: &[char], hand2: &[char]) -> std::cmp::Ordering {
-	let freqs1 = build_frequencies(hand1);
-	let freqs2 = build_frequencies(hand2);
+fn compare_hands(hand1: &[char], hand2: &[char], part: &Part) -> std::cmp::Ordering {
+	let freqs1 = build_frequencies(hand1, part);
+	let freqs2 = build_frequencies(hand2, part);
 
-	let sorted_freqs1 = freqs1.iter().sorted();
-	let sorted_freqs2 = freqs2.iter().sorted();
-
-	let freq_cmp = sorted_freqs1.cmp(sorted_freqs2);
+	let freq_cmp = freqs1.cmp(&freqs2);
 	if freq_cmp != std::cmp::Ordering::Equal {
-		return freq_cmp.reverse();
+		return freq_cmp;
 	}
 
 	for (c1, c2) in hand1.iter().zip(hand2.iter()) {
 		if c1 != c2 {
-			return card_to_index(c1).cmp(&card_to_index(c2));
+			return card_to_index(c1, part).cmp(&card_to_index(c2, part));
 		}
 	}
 
-	cmp::Ordering::Equal
-}
-
-fn compare_hands_part2(hand1: &[char], hand2: &[char]) -> std::cmp::Ordering {
-	let freqs1 = build_frequencies_part2(hand1);
-	let freqs2 = build_frequencies_part2(hand2);
-
-	let sorted_freqs1 = freqs1.iter().sorted();
-	let sorted_freqs2 = freqs2.iter().sorted();
-
-	let freq_cmp = sorted_freqs1.cmp(sorted_freqs2);
-	if freq_cmp != std::cmp::Ordering::Equal {
-		return freq_cmp.reverse();
-	}
-
-	for (c1, c2) in hand1.iter().zip(hand2.iter()) {
-		if c1 != c2 {
-			return card_to_index_part2(c1).cmp(&card_to_index_part2(c2));
-		}
-	}
-
-	cmp::Ordering::Equal
+	return cmp::Ordering::Equal
 }
 
 pub fn solve(inputs: Vec<String>) {
@@ -94,31 +69,18 @@ pub fn solve(inputs: Vec<String>) {
 		})
 		.collect_vec();
 
-	// -- Part 1 --
-	let entries_sorted_part1 = entries
-		.iter()
-		.sorted_by(|e1, e2| compare_hands_part1(&e1.hand, &e2.hand))
-		.collect_vec();
+	for part in &[Part::Part1, Part::Part2] {
+		let entries_sorted = entries
+			.iter()
+			.sorted_by(|e1, e2| compare_hands(&e1.hand, &e2.hand, part))
+			.collect_vec();
 
-	let part1 = entries_sorted_part1
-		.iter()
-		.enumerate()
-		.map(|(i, entry)| entry.bid * (i as u64 + 1))
-		.sum::<u64>();
+		let winnings = entries_sorted
+			.iter()
+			.enumerate()
+			.map(|(i, entry)| entry.bid * (i as u64 + 1))
+			.sum::<u64>();
 
-	println!("Part 1: {}", part1);
-
-	// -- Part 2 --
-	let entries_sorted_part2 = entries
-		.iter()
-		.sorted_by(|e1, e2| compare_hands_part2(&e1.hand, &e2.hand))
-		.collect_vec();
-
-	let part2 = entries_sorted_part2
-		.iter()
-		.enumerate()
-		.map(|(i, entry)| entry.bid * (i as u64 + 1))
-		.sum::<u64>();
-
-	println!("Part 2: {}", part2);
+		println!("Part {}: {}", if part == &Part::Part1 { 1 } else { 2 }, winnings);
+	}
 }
