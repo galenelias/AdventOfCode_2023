@@ -7,24 +7,21 @@ struct Node {
 	right: String,
 }
 
-pub fn solve(inputs: Vec<String>) {
-
-	let mut node_map = HashMap::new();
-
-	let directions = &inputs[0].chars().collect_vec();
-
-	for line in inputs[2..].iter() {
-		let (node_str, left_right_str) = line.split_once(" = ").unwrap();
-		let left_right_str = &left_right_str[1..left_right_str.len() - 1];
-		let (left, right) = left_right_str.split_once(", ").unwrap();
-
-		node_map.insert(node_str, Node { left: left.to_string(), right: right.to_string() });
-	}
-
+// Returns (steps_a_to_z, steps_z_to_z)
+fn get_steps(
+	node_map: &HashMap<&str, Node>,
+	directions: &[char],
+	start: &str,
+	part2: bool,
+) -> (usize, usize) {
 	let mut dir_index = 0;
-	let mut node = "AAA";
+	let mut node = start;
 	let mut steps = 0;
-	while node != "ZZZ" {
+
+	let mut steps_a_to_z = None;
+	let mut steps_z_to_z = None;
+
+	loop {
 		let direction = directions[dir_index];
 		let next_node = match direction {
 			'L' => &node_map.get(node).unwrap().left,
@@ -35,62 +32,69 @@ pub fn solve(inputs: Vec<String>) {
 		node = next_node;
 		dir_index = (dir_index + 1) % directions.len();
 		steps += 1;
-	}
 
-	println!("Part 1: {}", steps);
-
-	let mut ghost_nodes = node_map.keys().filter(|node| node.ends_with("A")).copied().collect_vec();
-	let mut dir_index = 0;
-	let mut steps: u64 = 0;
-	let mut last_z = vec![None; ghost_nodes.len()];
-	let mut intervals = vec![None; ghost_nodes.len()];
-
-	while !ghost_nodes.iter().all(|node| node.ends_with("Z")) {
-		let direction = directions[dir_index];
-		dir_index = (dir_index + 1) % directions.len();
-		steps += 1;
-		
-		for i in 0..ghost_nodes.len() {
-			let next_node = match direction {
-				'L' => &node_map.get(ghost_nodes[i]).unwrap().left,
-				'R' => &node_map.get(ghost_nodes[i]).unwrap().right,
-				_ => panic!("Unknown direction"),
-			};
-			ghost_nodes[i] = next_node;
-
-			if next_node.ends_with("Z") {
-				if last_z[i] != None {
-					let interval = steps - last_z[i].unwrap();
-					if intervals[i] == None {
-						println!("{}: Found Z at interval {} (steps = {})", i, interval, steps);
-						intervals[i] = Some(interval);
-
-						if intervals.iter().all(|interval| interval != &None) {
-							let mut sim_steps = steps;
-
-							// Walk by largest interval until all ghosts are at their finish node.
-							// Could be done with math, but that sounds harder...
-							loop {
-								if (0..ghost_nodes.len()).all(|i| {
-									let interval = intervals[i].unwrap();
-									(sim_steps - last_z[i].unwrap()) % interval == 0
-								}) {
-									println!("Part 2: {}", sim_steps);
-									return;
-								}
-
-								sim_steps += interval;
-							}
-						}
-
-					} else if intervals[i] != Some(interval) {
-						panic!("Intervals don't match: {}: {} vs {}", i, intervals[i].unwrap(), interval);
-					}
+		if node == "ZZZ" || (part2 && node.ends_with("Z")) {
+			if steps_a_to_z == None {
+				steps_a_to_z = Some(steps);
+			} else if steps_z_to_z == None {
+				steps_z_to_z = Some(steps - steps_a_to_z.unwrap());
+			} else {
+				if steps - steps_z_to_z.unwrap() - steps_a_to_z.unwrap() != steps_a_to_z.unwrap() {
+					panic!("Z -> Z interval is not consistent!");
 				}
-				last_z[i] = Some(steps);
+				return (steps_a_to_z.unwrap(), steps_z_to_z.unwrap());
 			}
 		}
 	}
+}
 
-	println!("Part 2: {}", steps);
+pub fn solve(inputs: Vec<String>) {
+	let directions = &inputs[0].chars().collect_vec();
+
+	let mut node_map = HashMap::new();
+	for line in inputs[2..].iter() {
+		let (node_str, left_right_str) = line.split_once(" = ").unwrap();
+		let left_right_str = &left_right_str[1..left_right_str.len() - 1];
+		let (left, right) = left_right_str.split_once(", ").unwrap();
+
+		node_map.insert(
+			node_str,
+			Node {
+				left: left.to_string(),
+				right: right.to_string(),
+			},
+		);
+	}
+
+	println!(
+		"Part 1: {}",
+		get_steps(&node_map, directions, "AAA", /*part2=*/ false).0
+	);
+
+	let ghost_nodes = node_map
+		.keys()
+		.filter(|node| node.ends_with("A"))
+		.copied()
+		.collect_vec();
+
+	let ghost_distances = ghost_nodes
+		.iter()
+		.map(|start| {
+			get_steps(&node_map, directions, start, /*part2=*/ true)
+		})
+		.sorted_by_key(|distances| distances.1)
+		.collect_vec();
+
+	// Walk our steps at the interval of the ghost with the longest interval, checking if all
+	// ghosts are at their finish node.
+	let &(start_steps, interval) = ghost_distances.last().unwrap();
+	for steps in (start_steps..).step_by(interval) {
+		if ghost_distances
+			.iter()
+			.all(|(a_to_z, z_to_z)| ((steps - a_to_z) % z_to_z) == 0)
+		{
+			println!("Part 2: {}", steps);
+			break;
+		}
+	}
 }
