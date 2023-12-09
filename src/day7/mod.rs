@@ -1,5 +1,5 @@
-use std::cmp;
 use itertools::Itertools;
+use std::cmp;
 
 struct Entry {
 	hand: Vec<char>,
@@ -14,9 +14,13 @@ enum Part {
 
 fn card_to_index(card: &char, part: &Part) -> usize {
 	let cards = if part == &Part::Part1 {
-		[ '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A', ]
+		[
+			'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A',
+		]
 	} else {
-		[ 'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A', ]
+		[
+			'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A',
+		]
 	};
 	cards.iter().position(|c| c == card).unwrap()
 }
@@ -54,7 +58,7 @@ fn compare_hands(hand1: &[char], hand2: &[char], part: &Part) -> std::cmp::Order
 		}
 	}
 
-	return cmp::Ordering::Equal
+	return cmp::Ordering::Equal;
 }
 
 pub fn solve(inputs: Vec<String>) {
@@ -81,6 +85,10 @@ pub fn solve(inputs: Vec<String>) {
 			.map(|(i, entry)| entry.bid * (i as u64 + 1))
 			.sum::<u64>();
 
-		println!("Part {}: {}", if part == &Part::Part1 { 1 } else { 2 }, winnings);
+		println!(
+			"Part {}: {}",
+			if part == &Part::Part1 { 1 } else { 2 },
+			winnings
+		);
 	}
 }
