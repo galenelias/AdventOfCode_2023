@@ -74,36 +74,24 @@ pub fn solve(inputs: Vec<String>) {
 	let mut prev_pos = start_pos;
 	let mut pos = start_pipe_neighbors[1].clone();
 
-	let mut parity = vec![vec![0i64; grid[0].len()]; grid.len()];
-
 	println!("Initial neighbors: {:?}", start_pipe_neighbors);
 
 	loop {
 		let ch = grid[pos.0][pos.1];
 		if pos.1 == prev_pos.1 - 1 { // moving left
 			if ch != 'F' {
-				for r in 0..pos.0+1 {
-					parity[r][pos.1] += 1;
-				}
 				area += pos.0 as i64 + 1;
 			}
 		} else if pos.1 == prev_pos.1 + 1 { // moving right
 			if ch != 'J' {
 				area -= pos.0 as i64;
-				for r in 0..pos.0 {
-					parity[r][pos.1] -= 1;
-				}
 			}  // '7' OK
 		} else if grid[pos.0][pos.1] != '|' {
-			// 
 			if pos.0 == prev_pos.0 - 1 { // moving up
 				match ch {
 					'7' => { /* turning left, no-op */ },
 					'F' => { // turning right
 						area -= pos.0 as i64;
-						for r in 0..pos.0 {
-							parity[r][pos.1] -= 1;
-						}
 					},
 					_ => { panic!("Unknown pipe type: {}", ch); }
 				}
@@ -111,15 +99,11 @@ pub fn solve(inputs: Vec<String>) {
 				match ch {
 					'J' => { // turning left
 						area += pos.0 as i64 + 1;
-						for r in 0..pos.0+1 {
-							parity[r][pos.1] += 1;
-						}
 					},
 					'L' => { /* turning right, no-op */ },
 					_ => { panic!("Unknown pipe type: {}", ch); }
 				}
 			}
-
 		}
 
 		if pos == start_pos {
@@ -134,8 +118,4 @@ pub fn solve(inputs: Vec<String>) {
 
 	println!("Part 1: {}", steps / 2);
 	println!("Part 2: {}", area - steps);
-
-	// for line in &parity {
-	// 	println!("{:?}", line);
-	// }
 }
