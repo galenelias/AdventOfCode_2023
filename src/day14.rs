@@ -33,7 +33,7 @@ fn tilt_grid(grid: &mut Vec<Vec<char>>, rocks: &mut Vec<(usize, usize)>, dir: &D
 	});
 
 	for rock in rocks {
-		let old_pos = *rock;
+		grid[rock.0][rock.1] = '.';
 		match dir {
 			Dir::North => {
 				while rock.0 > 0 && grid[rock.0 - 1][rock.1] == '.' {
@@ -56,10 +56,8 @@ fn tilt_grid(grid: &mut Vec<Vec<char>>, rocks: &mut Vec<(usize, usize)>, dir: &D
 				}
 			}
 		}
-		if *rock != old_pos {
-			grid[old_pos.0][old_pos.1] = '.';
-			grid[rock.0][rock.1] = 'O';
-		}
+
+		grid[rock.0][rock.1] = 'O';
 	}
 }
 
