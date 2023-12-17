@@ -1,9 +1,8 @@
 use itertools::Itertools;
 
 fn hash(s: &str) -> u8 {
-	s.chars().fold(0u8, |hash, ch| {
-		hash.wrapping_add(ch as u8).wrapping_mul(17)
-	})
+	s.chars()
+		.fold(0u8, |hash, ch| hash.wrapping_add(ch as u8).wrapping_mul(17))
 }
 
 pub fn solve(inputs: Vec<String>) {
