@@ -22,7 +22,6 @@ struct Module<'a> {
 }
 
 pub fn solve(inputs: Vec<String>) {
-
 	let mut modules = HashMap::new();
 	let mut module_inputs: HashMap<&str, Vec<&str>> = HashMap::new();
 	let mut flipflop_states: HashMap<&str, bool> = HashMap::new();
@@ -64,22 +63,14 @@ pub fn solve(inputs: Vec<String>) {
 		}
 	}
 
-	// Initialize inputs
+	// Initialize conjection states
 	for (name, module) in &modules {
 		for output in &module.outputs {
-			module_inputs.entry(output).or_default().push(name);
-		}
-	}
-
-	for (&name, module) in &modules {
-		if module.module_type == ModuleType::Conjunction {
-			let mut input_states = HashMap::new();
-
-			for input in module_inputs.get(name).unwrap() {
-				input_states.insert(*input, Pulse::Low);
+			if let Some(output_module) = modules.get(output) {
+				if output_module.module_type == ModuleType::Conjunction {
+					conjunction_states.get_mut(output).unwrap().insert(name, Pulse::Low);
+				}
 			}
-
-			conjunction_states.insert(name, input_states);
 		}
 	}
 
@@ -92,7 +83,7 @@ pub fn solve(inputs: Vec<String>) {
 
 	let num_conjunctions = modules.values().filter(|m| m.module_type == ModuleType::Conjunction).count();
 
-	for pushes in 1.. {
+	for pushes in 1i64.. {
 		// Push button signal
 		signals.push_back(("button", "broadcaster", Pulse::Low));
 
