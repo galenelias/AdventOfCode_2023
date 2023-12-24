@@ -44,10 +44,6 @@ pub fn solve(inputs: Vec<String>) {
 		})
 		.collect_vec();
 
-	for hailstone in &hailstones {
-		println!("{:?}", hailstone);
-	}
-
 	let mut part1 = 0;
 	for i in 0..hailstones.len() {
 		for j in i..hailstones.len() {
@@ -69,9 +65,10 @@ pub fn solve(inputs: Vec<String>) {
 
 	println!("Part 1: {}", part1);
 
+	println!("Part 2 - equations to be plugged into Z3:");
 	for (i, hs) in hailstones.iter().enumerate().take(3) {
-		println!("{} + {} * t{} = px + rx * t{}", hs.pos.0, hs.vel.0, i, i);
-		println!("{} + {} * t{} = py + ry * t{}", hs.pos.1, hs.vel.1, i, i);
-		println!("{} + {} * t{} = pz + rz * t{}", hs.pos.2, hs.vel.2, i, i);
+		println!("{} + {} * t{} == px + vx * t{}", hs.pos.0, hs.vel.0, i+1, i+1);
+		println!("{} + {} * t{} == py + vy * t{}", hs.pos.1, hs.vel.1, i+1, i+1);
+		println!("{} + {} * t{} == pz + vz * t{}", hs.pos.2, hs.vel.2, i+1, i+1);
 	}
 }
