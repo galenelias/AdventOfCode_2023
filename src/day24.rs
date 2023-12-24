@@ -68,4 +68,10 @@ pub fn solve(inputs: Vec<String>) {
 	}
 
 	println!("Part 1: {}", part1);
+
+	for (i, hs) in hailstones.iter().enumerate().take(3) {
+		println!("{} + {} * t{} = px + rx * t{}", hs.pos.0, hs.vel.0, i, i);
+		println!("{} + {} * t{} = py + ry * t{}", hs.pos.1, hs.vel.1, i, i);
+		println!("{} + {} * t{} = pz + rz * t{}", hs.pos.2, hs.vel.2, i, i);
+	}
 }
