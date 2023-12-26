@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use std::cmp::Ordering;
-use std::collections::{HashSet, BinaryHeap};
+use std::collections::{BinaryHeap, HashSet};
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 enum Dir {
@@ -42,8 +42,20 @@ fn opposite_dir(dir: &Dir) -> Dir {
 
 fn sub_solve(grid: &Vec<Vec<u32>>, dist_to_turn: usize, max_dist: usize) -> u32 {
 	let mut queue = BinaryHeap::new();
-	queue.push(State{ r: 0, c: 1, dir: Dir::Right, steps: 1, heat_loss: grid[0][1] });
-	queue.push(State{ r: 1, c: 0, dir: Dir::Down, steps: 1, heat_loss: grid[1][0] });
+	queue.push(State {
+		r: 0,
+		c: 1,
+		dir: Dir::Right,
+		steps: 1,
+		heat_loss: grid[0][1],
+	});
+	queue.push(State {
+		r: 1,
+		c: 0,
+		dir: Dir::Down,
+		steps: 1,
+		heat_loss: grid[1][0],
+	});
 
 	let mut seen = HashSet::new();
 
@@ -63,7 +75,10 @@ fn sub_solve(grid: &Vec<Vec<u32>>, dist_to_turn: usize, max_dist: usize) -> u32 
 		}
 
 		// Terminating condition
-		if r as usize == grid.len() - 1 && c as usize == grid[0].len() - 1 && state.steps >= dist_to_turn {
+		if r as usize == grid.len() - 1
+			&& c as usize == grid[0].len() - 1
+			&& state.steps >= dist_to_turn
+		{
 			return heat_loss;
 		}
 
@@ -84,8 +99,14 @@ fn sub_solve(grid: &Vec<Vec<u32>>, dist_to_turn: usize, max_dist: usize) -> u32 
 
 			if r >= 0 && r < grid.len() as isize && c >= 0 && c < grid[0].len() as isize {
 				let heat_loss = state.heat_loss + grid[r as usize][c as usize];
-				queue.push(State{ r, c, dir, steps, heat_loss });
-			}			
+				queue.push(State {
+					r,
+					c,
+					dir,
+					steps,
+					heat_loss,
+				});
+			}
 		};
 
 		try_dir(Dir::Up);
@@ -98,14 +119,13 @@ fn sub_solve(grid: &Vec<Vec<u32>>, dist_to_turn: usize, max_dist: usize) -> u32 
 }
 
 pub fn solve(inputs: Vec<String>) {
-
 	let grid = inputs
 		.iter()
 		.map(|line| line.chars().map(|c| c.to_digit(10).unwrap()).collect_vec())
 		.collect_vec();
 
-	let part1 = sub_solve(&grid, /*dist_to_turn=*/ 1, /*max_dist=*/ 3 );
-	let part2 = sub_solve(&grid, /*dist_to_turn=*/ 4, /*max_dist=*/ 10 );
+	let part1 = sub_solve(&grid, /*dist_to_turn=*/ 1, /*max_dist=*/ 3);
+	let part2 = sub_solve(&grid, /*dist_to_turn=*/ 4, /*max_dist=*/ 10);
 
 	println!("Part 1: {}", part1);
 	println!("Part 2: {}", part2);

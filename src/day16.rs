@@ -70,18 +70,24 @@ pub fn solve(inputs: Vec<String>) {
 
 	// == Part 2 ==
 	// Left and right edges
-	let lr_edges_max = (0..grid.len()).map(|r| {
-		let left = sub_solve(&grid, r as isize, 0, 0, 1);
-		let right = sub_solve(&grid, r as isize, grid[0].len() as isize - 1, 0, -1);
-		return std::cmp::max(left, right);
-	}).max().unwrap();
+	let lr_edges_max = (0..grid.len())
+		.map(|r| {
+			let left = sub_solve(&grid, r as isize, 0, 0, 1);
+			let right = sub_solve(&grid, r as isize, grid[0].len() as isize - 1, 0, -1);
+			return std::cmp::max(left, right);
+		})
+		.max()
+		.unwrap();
 
 	// Top and bottom edges
-	let tb_edges_max = (0..grid[0].len()).map(|c| {
-		let top = sub_solve(&grid, 0, c as isize, 1, 0);
-		let bottom = sub_solve(&grid, grid.len() as isize - 1, c as isize, -1, 0);
-		return std::cmp::max(top, bottom);
-	}).max().unwrap();
+	let tb_edges_max = (0..grid[0].len())
+		.map(|c| {
+			let top = sub_solve(&grid, 0, c as isize, 1, 0);
+			let bottom = sub_solve(&grid, grid.len() as isize - 1, c as isize, -1, 0);
+			return std::cmp::max(top, bottom);
+		})
+		.max()
+		.unwrap();
 
 	let part2 = std::cmp::max(lr_edges_max, tb_edges_max);
 	println!("Part 2: {part2}");

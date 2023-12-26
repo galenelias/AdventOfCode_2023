@@ -29,13 +29,18 @@ fn get_intersection(hs1: &Hailstone, hs2: &Hailstone) -> Option<(f64, f64)> {
 }
 
 pub fn solve(inputs: Vec<String>) {
-
 	let hailstones = inputs
 		.iter()
 		.map(|line| {
 			let (pos_str, vel_str) = line.split_once(" @ ").unwrap();
-			let pos = pos_str.split(", ").map(|s| s.trim().parse::<f64>().unwrap()).collect_vec();
-			let vel = vel_str.split(", ").map(|s| s.trim().parse::<f64>().unwrap()).collect_vec();
+			let pos = pos_str
+				.split(", ")
+				.map(|s| s.trim().parse::<f64>().unwrap())
+				.collect_vec();
+			let vel = vel_str
+				.split(", ")
+				.map(|s| s.trim().parse::<f64>().unwrap())
+				.collect_vec();
 
 			Hailstone {
 				pos: (pos[0], pos[1], pos[2]),
@@ -55,7 +60,11 @@ pub fn solve(inputs: Vec<String>) {
 			let hs2 = &hailstones[j];
 
 			if let Some((px, py)) = get_intersection(hs1, hs2) {
-				if px >= 200000000000000f64 && px <= 400000000000000f64 && py >= 200000000000000f64 && py <= 400000000000000f64 {
+				if px >= 200000000000000f64
+					&& px <= 400000000000000f64
+					&& py >= 200000000000000f64
+					&& py <= 400000000000000f64
+				{
 					part1 += 1;
 				}
 			} else {
@@ -67,8 +76,26 @@ pub fn solve(inputs: Vec<String>) {
 
 	println!("Part 2 - equations to be plugged into Z3:");
 	for (i, hs) in hailstones.iter().enumerate().take(3) {
-		println!("{} + {} * t{} == px + vx * t{}", hs.pos.0, hs.vel.0, i+1, i+1);
-		println!("{} + {} * t{} == py + vy * t{}", hs.pos.1, hs.vel.1, i+1, i+1);
-		println!("{} + {} * t{} == pz + vz * t{}", hs.pos.2, hs.vel.2, i+1, i+1);
+		println!(
+			"{} + {} * t{} == px + vx * t{}",
+			hs.pos.0,
+			hs.vel.0,
+			i + 1,
+			i + 1
+		);
+		println!(
+			"{} + {} * t{} == py + vy * t{}",
+			hs.pos.1,
+			hs.vel.1,
+			i + 1,
+			i + 1
+		);
+		println!(
+			"{} + {} * t{} == pz + vz * t{}",
+			hs.pos.2,
+			hs.vel.2,
+			i + 1,
+			i + 1
+		);
 	}
 }

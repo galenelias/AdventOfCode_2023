@@ -74,62 +74,71 @@ pub fn solve(inputs: Vec<String>) {
 	while !inputs[i].is_empty() {
 		let input = &inputs[i];
 		let (name, rules_str) = input.split_once('{').unwrap();
-		let rules_str = &rules_str[..rules_str.len()-1];
+		let rules_str = &rules_str[..rules_str.len() - 1];
 
-		let rules = rules_str.split(',').map(|rule_str| {
-			if let Some((cond_str, dest_str)) = rule_str.split_once(":") {
-				let mut cond_iter = cond_str.chars();
-				let category = cond_iter.next().unwrap();
-				let op = match cond_iter.next().unwrap() {
-					'<' => Operation::LessThan,
-					'>' => Operation::GreaterThan,
-					_ => unreachable!(),
-				};
-				let value = cond_str[2..].parse::<i64>().unwrap();
+		let rules = rules_str
+			.split(',')
+			.map(|rule_str| {
+				if let Some((cond_str, dest_str)) = rule_str.split_once(":") {
+					let mut cond_iter = cond_str.chars();
+					let category = cond_iter.next().unwrap();
+					let op = match cond_iter.next().unwrap() {
+						'<' => Operation::LessThan,
+						'>' => Operation::GreaterThan,
+						_ => unreachable!(),
+					};
+					let value = cond_str[2..].parse::<i64>().unwrap();
 
-				let dest = match dest_str {
-					"A" => Destination::Accept,
-					"R" => Destination::Reject,
-					_ => Destination::Workflow(dest_str.to_string()),
-				};
+					let dest = match dest_str {
+						"A" => Destination::Accept,
+						"R" => Destination::Reject,
+						_ => Destination::Workflow(dest_str.to_string()),
+					};
 
-				return Rule {
-					condition: Some(Condition {
-						category,
-						op,
-						value,
-					}),
-					dest,
-				};	
-			} else {
-				let dest = match rule_str {
-					"A" => Destination::Accept,
-					"R" => Destination::Reject,
-					_ => Destination::Workflow(rule_str.to_string()),
-				};
+					return Rule {
+						condition: Some(Condition {
+							category,
+							op,
+							value,
+						}),
+						dest,
+					};
+				} else {
+					let dest = match rule_str {
+						"A" => Destination::Accept,
+						"R" => Destination::Reject,
+						_ => Destination::Workflow(rule_str.to_string()),
+					};
 
-				return Rule {
-					condition: None,
-					dest,
-				};
-			}
-		}).collect_vec();
+					return Rule {
+						condition: None,
+						dest,
+					};
+				}
+			})
+			.collect_vec();
 
 		workflows.insert(name.to_string(), Workflow { rules });
 		i += 1;
 	}
 
 	i += 1;
-	let parts = inputs[i..].iter().map(|line| {
-		let line = &line[1..line.len()-1];
-		let mut part = Part::new();
+	let parts = inputs[i..]
+		.iter()
+		.map(|line| {
+			let line = &line[1..line.len() - 1];
+			let mut part = Part::new();
 
-		for assignment in line.split(",") {
-			let (category, value) = assignment.split_once("=").unwrap();
-			part.set_category(category.chars().next().unwrap(), value.parse::<i64>().unwrap());
-		}
-		return part;
-	}).collect_vec();
+			for assignment in line.split(",") {
+				let (category, value) = assignment.split_once("=").unwrap();
+				part.set_category(
+					category.chars().next().unwrap(),
+					value.parse::<i64>().unwrap(),
+				);
+			}
+			return part;
+		})
+		.collect_vec();
 
 	let mut part1 = 0;
 	for part in &parts {
@@ -164,7 +173,9 @@ pub fn solve(inputs: Vec<String>) {
 					part1 += part.x + part.m + part.a + part.s;
 					break;
 				}
-				Some(Destination::Reject) => { break; }
+				Some(Destination::Reject) => {
+					break;
+				}
 				Some(Destination::Workflow(name)) => workflow = name,
 				None => panic!("No destination found"),
 			}
@@ -173,7 +184,21 @@ pub fn solve(inputs: Vec<String>) {
 	println!("Part 1: {}", part1);
 
 	let mut queue = VecDeque::new();
-	queue.push_back((Destination::Workflow(String::from("in")), Part{ x: 1, m: 1, a: 1, s: 1 }, Part{ x: 4000, m: 4000, a: 4000, s: 4000 }));
+	queue.push_back((
+		Destination::Workflow(String::from("in")),
+		Part {
+			x: 1,
+			m: 1,
+			a: 1,
+			s: 1,
+		},
+		Part {
+			x: 4000,
+			m: 4000,
+			a: 4000,
+			s: 4000,
+		},
+	));
 
 	let mut passing_parts = Vec::new();
 
@@ -188,9 +213,7 @@ pub fn solve(inputs: Vec<String>) {
 			Destination::Reject => {
 				continue;
 			}
-			Destination::Workflow(name) => {
-				name
-			}
+			Destination::Workflow(name) => name,
 		};
 
 		let rules = &workflows.get(&workflow).unwrap().rules;
@@ -242,9 +265,12 @@ pub fn solve(inputs: Vec<String>) {
 		}
 	}
 
-	let part2 = passing_parts.iter().map(|(min, max)| 
-		(max.x + 1 - min.x) * (max.m + 1 - min.m) * (max.a + 1 - min.a) * (max.s + 1 - min.s)
-	).sum::<i64>();
+	let part2 = passing_parts
+		.iter()
+		.map(|(min, max)| {
+			(max.x + 1 - min.x) * (max.m + 1 - min.m) * (max.a + 1 - min.a) * (max.s + 1 - min.s)
+		})
+		.sum::<i64>();
 
 	println!("Part 2: {}", part2);
 }

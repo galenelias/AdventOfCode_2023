@@ -8,7 +8,7 @@ fn min_cut(mut mat: Vec<Vec<i32>>) -> (i32, Vec<usize>) {
 	let n = mat.len();
 	let mut best = (i32::MAX, Vec::new());
 	let mut co = vec![Vec::new(); n];
-	
+
 	for i in 0..n {
 		co[i].push(i);
 	}
@@ -17,7 +17,7 @@ fn min_cut(mut mat: Vec<Vec<i32>>) -> (i32, Vec<usize>) {
 		let mut w = mat[0].clone();
 		let mut t = 0;
 		let mut s = 0;
-		for _it in 0..n-ph {
+		for _it in 0..n - ph {
 			w[t] = i32::MIN;
 			s = t;
 			t = w.iter().position_max().unwrap();
@@ -69,5 +69,8 @@ pub fn solve(inputs: Vec<String>) {
 	}
 
 	let (_min_cut, min_cut_nodes) = min_cut(mat);
-	println!("Part 1: {}", min_cut_nodes.len() * (nodes.len() - min_cut_nodes.len()));
+	println!(
+		"Part 1: {}",
+		min_cut_nodes.len() * (nodes.len() - min_cut_nodes.len())
+	);
 }

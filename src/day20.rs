@@ -25,18 +25,18 @@ pub fn solve(inputs: Vec<String>) {
 	let mut modules = HashMap::new();
 	let mut module_inputs: HashMap<&str, Vec<&str>> = HashMap::new();
 	let mut flipflop_states: HashMap<&str, bool> = HashMap::new();
-	let mut conjunction_states: HashMap<&str, HashMap::<&str, Pulse>> = HashMap::new();
+	let mut conjunction_states: HashMap<&str, HashMap<&str, Pulse>> = HashMap::new();
 
 	for line in &inputs {
 		let (name, outputs) = line.split_once(" -> ").unwrap();
 
-		let (name, module_type) = if name == "broadcaster"{
+		let (name, module_type) = if name == "broadcaster" {
 			(name, ModuleType::Broadcast)
 		} else if name.starts_with("%") {
 			(&name[1..], ModuleType::FlipFlop)
 		} else if name.starts_with("&") {
 			(&name[1..], ModuleType::Conjunction)
-		}  else {
+		} else {
 			unreachable!();
 		};
 
@@ -46,20 +46,23 @@ pub fn solve(inputs: Vec<String>) {
 			module_inputs.entry(output).or_default().push(name);
 		}
 
-		modules.insert(name, Module {
-			module_type,
+		modules.insert(
 			name,
-			outputs,
-		});
+			Module {
+				module_type,
+				name,
+				outputs,
+			},
+		);
 
 		match module_type {
 			ModuleType::FlipFlop => {
 				flipflop_states.insert(name, false);
-			},
+			}
 			ModuleType::Conjunction => {
 				conjunction_states.insert(name, HashMap::new());
-			},
-			_ => {},
+			}
+			_ => {}
 		}
 	}
 
@@ -68,7 +71,10 @@ pub fn solve(inputs: Vec<String>) {
 		for output in &module.outputs {
 			if let Some(output_module) = modules.get(output) {
 				if output_module.module_type == ModuleType::Conjunction {
-					conjunction_states.get_mut(output).unwrap().insert(name, Pulse::Low);
+					conjunction_states
+						.get_mut(output)
+						.unwrap()
+						.insert(name, Pulse::Low);
 				}
 			}
 		}
@@ -81,7 +87,10 @@ pub fn solve(inputs: Vec<String>) {
 	let mut last_activation_pushes = HashMap::new();
 	let mut conjuction_period = HashMap::new();
 
-	let num_conjunctions = modules.values().filter(|m| m.module_type == ModuleType::Conjunction).count();
+	let num_conjunctions = modules
+		.values()
+		.filter(|m| m.module_type == ModuleType::Conjunction)
+		.count();
 
 	for pushes in 1i64.. {
 		// Push button signal
@@ -108,7 +117,7 @@ pub fn solve(inputs: Vec<String>) {
 								signals.push_back((module.name, output, out_pulse));
 							}
 						}
-					},
+					}
 					ModuleType::Conjunction => {
 						let conjunction_state = conjunction_states.get_mut(module.name).unwrap();
 						conjunction_state.insert(source, pulse);
@@ -118,7 +127,10 @@ pub fn solve(inputs: Vec<String>) {
 								let period = pushes - last_push;
 								if let Some(last_period) = conjuction_period.get(module.name) {
 									if period != 0 && period != *last_period {
-										println!("{}: Period changed from {} to {}!!", module.name, last_period, period);
+										println!(
+											"{}: Period changed from {} to {}!!",
+											module.name, last_period, period
+										);
 									}
 								} else {
 									conjuction_period.insert(module.name, period);
@@ -128,7 +140,10 @@ pub fn solve(inputs: Vec<String>) {
 									// conjunction and hence the final output
 									if conjuction_period.len() == num_conjunctions - 1 {
 										// Should use LCM, but this is likely good enough
-										println!("Part 2: {}", conjuction_period.values().fold(1, |acc, &p| acc * p));
+										println!(
+											"Part 2: {}",
+											conjuction_period.values().fold(1, |acc, &p| acc * p)
+										);
 										return;
 									}
 								}
@@ -143,12 +158,12 @@ pub fn solve(inputs: Vec<String>) {
 						for output in module.outputs.iter() {
 							signals.push_back((module.name, output, out_pulse));
 						}
-					},
+					}
 					ModuleType::Broadcast => {
 						for output in module.outputs.iter() {
 							signals.push_back((module.name, output, pulse));
 						}
-					},
+					}
 				}
 			}
 		}

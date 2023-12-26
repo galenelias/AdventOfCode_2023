@@ -16,13 +16,13 @@ fn sub_solve(inputs: &[(char, i64)]) -> i64 {
 		};
 
 		area += match (dir, last_dir) {
-			('R', 'D') => -r * (dist-1),
+			('R', 'D') => -r * (dist - 1),
 			('R', 'U') => -r * dist,
 			('D', 'L') => 0,
 			('D', 'R') => -r,
-			('L', 'D') => (r+1) * dist,
-			('L', 'U') => (r+1) * (dist-1),
-			('U', 'L') => r+1,
+			('L', 'D') => (r + 1) * dist,
+			('L', 'U') => (r + 1) * (dist - 1),
+			('U', 'L') => r + 1,
 			('U', 'R') => 0,
 			_ => unreachable!("Unhandled case: {} {}", dir, last_dir),
 		};
@@ -33,29 +33,35 @@ fn sub_solve(inputs: &[(char, i64)]) -> i64 {
 
 	return area;
 }
+
 pub fn solve(inputs: Vec<String>) {
+	let part1_inputs = inputs
+		.iter()
+		.map(|line| {
+			let parts = line.split_whitespace().collect_vec();
+			let dir = parts[0].chars().next().unwrap();
+			let dist = parts[1].parse::<i64>().unwrap();
+			(dir, dist)
+		})
+		.collect_vec();
 
-	let part1_inputs = inputs.iter().map(|line| {
-		let parts = line.split_whitespace().collect_vec();
-		let dir = parts[0].chars().next().unwrap();
-		let dist = parts[1].parse::<i64>().unwrap();
-		(dir, dist)
-	}).collect_vec();
+	let part2_inputs = inputs
+		.iter()
+		.map(|line| {
+			let parts = line.split_whitespace().collect_vec();
+			let color = &parts[2][2..parts[2].len() - 1];
+			let dir = match color.chars().last().unwrap() {
+				'0' => 'R',
+				'1' => 'D',
+				'2' => 'L',
+				'3' => 'U',
+				_ => unreachable!(),
+			};
 
-	let part2_inputs = inputs.iter().map(|line| {
-		let parts = line.split_whitespace().collect_vec();
-		let color = &parts[2][2..parts[2].len()-1];
-		let dir = match color.chars().last().unwrap() {
-			'0' => 'R',
-			'1' => 'D',
-			'2' => 'L',
-			'3' => 'U',
-			_ => unreachable!(),
-		};
-		
-		let dist = i64::from_str_radix(&color[..color.len()-1], 16).unwrap();
-		(dir, dist)
-	}).collect_vec();
+			let dist = i64::from_str_radix(&color[..color.len() - 1], 16).unwrap();
+			(dir, dist)
+		})
+		.collect_vec();
 
 	println!("Part 1: {}", sub_solve(&part1_inputs));
 	println!("Part 2: {}", sub_solve(&part2_inputs));

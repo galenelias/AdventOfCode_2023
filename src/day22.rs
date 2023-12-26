@@ -40,15 +40,24 @@ fn drop_bricks(bricks: &mut Vec<Brick>) -> usize {
 }
 
 pub fn solve(inputs: Vec<String>) {
-	let mut bricks = inputs.iter().map(|line| {
-		let (pt1, pt2) = line.split_once("~").unwrap();
-		let pt1 = pt1.split(",").map(|s| s.parse::<usize>().unwrap()).collect_vec();
-		let pt2 = pt2.split(",").map(|s| s.parse::<usize>().unwrap()).collect_vec();
-		Brick {
-			pt1: [pt1[0], pt1[1], pt1[2]],
-			pt2: [pt2[0], pt2[1], pt2[2]],
-		}
-	}).collect_vec();
+	let mut bricks = inputs
+		.iter()
+		.map(|line| {
+			let (pt1, pt2) = line.split_once("~").unwrap();
+			let pt1 = pt1
+				.split(",")
+				.map(|s| s.parse::<usize>().unwrap())
+				.collect_vec();
+			let pt2 = pt2
+				.split(",")
+				.map(|s| s.parse::<usize>().unwrap())
+				.collect_vec();
+			Brick {
+				pt1: [pt1[0], pt1[1], pt1[2]],
+				pt2: [pt2[0], pt2[1], pt2[2]],
+			}
+		})
+		.collect_vec();
 
 	loop {
 		bricks.sort_by_key(|brick| brick.pt1[2]); // Sort by z

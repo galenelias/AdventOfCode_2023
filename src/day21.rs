@@ -1,7 +1,12 @@
 use itertools::Itertools;
-use std::collections::{VecDeque, HashMap};
+use std::collections::{HashMap, VecDeque};
 
-fn count_squares_in_steps(distances_map: &HashMap<(isize, isize), Vec<Vec<Option<usize>>>>, row_count: usize, col_count: usize, distance: usize) -> usize {
+fn count_squares_in_steps(
+	distances_map: &HashMap<(isize, isize), Vec<Vec<Option<usize>>>>,
+	row_count: usize,
+	col_count: usize,
+	distance: usize,
+) -> usize {
 	let mut result = 0;
 	for distances in distances_map.values() {
 		for r in 0..row_count {
@@ -18,12 +23,21 @@ fn count_squares_in_steps(distances_map: &HashMap<(isize, isize), Vec<Vec<Option
 	return result;
 }
 
-fn sub_solve(grid: &Vec<Vec<char>>, start_pos: (isize, isize), distance: usize, part2: bool) -> usize {
+fn sub_solve(
+	grid: &Vec<Vec<char>>,
+	start_pos: (isize, isize),
+	distance: usize,
+	part2: bool,
+) -> usize {
 	// Map of (grid_r, grid_c) -> (distance grid)
 	let mut distances_map = HashMap::new();
 
 	let mut queue = VecDeque::new();
-	queue.push_back(((start_pos.0 as isize, start_pos.1 as isize), (0isize, 0isize), 0));
+	queue.push_back((
+		(start_pos.0 as isize, start_pos.1 as isize),
+		(0isize, 0isize),
+		0,
+	));
 
 	let mut report_dist = 1;
 	let mut values = Vec::new();
@@ -33,7 +47,8 @@ fn sub_solve(grid: &Vec<Vec<char>>, start_pos: (isize, isize), distance: usize, 
 
 		if part2 && steps > report_dist {
 			if report_dist >= 65 && ((report_dist - 65) % 131) == 0 {
-				let count = count_squares_in_steps(&distances_map, grid.len(), grid[0].len(), report_dist);
+				let count =
+					count_squares_in_steps(&distances_map, grid.len(), grid[0].len(), report_dist);
 				values.push(count);
 
 				// Fit a quadratic equation to the first 3 values:  a*i^2 + b*i + c
@@ -52,7 +67,9 @@ fn sub_solve(grid: &Vec<Vec<char>>, start_pos: (isize, isize), distance: usize, 
 			report_dist += 1;
 		}
 
-		let distances = distances_map.entry(grid_num).or_insert(vec![vec![None; grid[0].len()]; grid.len()]);
+		let distances = distances_map
+			.entry(grid_num)
+			.or_insert(vec![vec![None; grid[0].len()]; grid.len()]);
 
 		if !distances[pos.0 as usize][pos.1 as usize].is_none() {
 			continue;
@@ -94,7 +111,10 @@ fn sub_solve(grid: &Vec<Vec<char>>, start_pos: (isize, isize), distance: usize, 
 				}
 			}
 
-			if adj.0 >= 0 && adj.0 < grid.len() as isize && adj.1 >= 0 && adj.1 < grid[0].len() as isize {
+			if adj.0 >= 0
+				&& adj.0 < grid.len() as isize
+				&& adj.1 >= 0 && adj.1 < grid[0].len() as isize
+			{
 				let ch = grid[adj.0 as usize][adj.1 as usize];
 				if ch == '.' {
 					queue.push_back((adj, new_grid_num, steps + 1));
@@ -107,16 +127,29 @@ fn sub_solve(grid: &Vec<Vec<char>>, start_pos: (isize, isize), distance: usize, 
 }
 
 pub fn solve(inputs: Vec<String>) {
-	let mut grid = inputs.iter().map(|line| line.chars().collect_vec()).collect_vec();
+	let mut grid = inputs
+		.iter()
+		.map(|line| line.chars().collect_vec())
+		.collect_vec();
 
-	let start_pos = grid.iter().enumerate().find_map(|(r, line)| {
-		line.iter().enumerate().find_map(|(c, &ch)| if ch == 'S' { Some((r as isize, c as isize)) } else { None })
-	}).unwrap();
+	let start_pos = grid
+		.iter()
+		.enumerate()
+		.find_map(|(r, line)| {
+			line.iter().enumerate().find_map(|(c, &ch)| {
+				if ch == 'S' {
+					Some((r as isize, c as isize))
+				} else {
+					None
+				}
+			})
+		})
+		.unwrap();
 
 	grid[start_pos.0 as usize][start_pos.1 as usize] = '.';
 
-	let part1 = sub_solve(&grid, start_pos, 64, /*part2=*/false);
-	let part2 = sub_solve(&grid, start_pos, 501, /*part2=*/true);
+	let part1 = sub_solve(&grid, start_pos, 64, /*part2=*/ false);
+	let part2 = sub_solve(&grid, start_pos, 501, /*part2=*/ true);
 
 	println!("Part 1: {}", part1);
 	println!("Part 2: {}", part2);

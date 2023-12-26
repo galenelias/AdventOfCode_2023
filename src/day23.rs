@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{VecDeque, HashSet};
+use std::collections::{HashSet, VecDeque};
 
 fn is_intersection(grid: &Vec<Vec<char>>, pos: (usize, usize)) -> bool {
 	let adjacent_paths = if grid[pos.0 - 1][pos.1] != '#' { 1 } else { 0 }
@@ -11,7 +11,12 @@ fn is_intersection(grid: &Vec<Vec<char>>, pos: (usize, usize)) -> bool {
 }
 
 // Run BFS from one intersection to another to calculate distances between them
-fn bfs(grid: &Vec<Vec<char>>, start_pos: (usize, usize), end_pos: (usize, usize), part2: bool) -> Option<usize> {
+fn bfs(
+	grid: &Vec<Vec<char>>,
+	start_pos: (usize, usize),
+	end_pos: (usize, usize),
+	part2: bool,
+) -> Option<usize> {
 	let mut visited = HashSet::new();
 	let mut queue = VecDeque::new();
 
@@ -52,7 +57,12 @@ fn bfs(grid: &Vec<Vec<char>>, start_pos: (usize, usize), end_pos: (usize, usize)
 }
 
 // Run DFS across the intersections to find the longest path
-fn dfs(distances: &Vec<Vec<Option<usize>>>, start_index: usize, end_index: usize, visited: &mut Vec<bool>) -> Option<usize> {
+fn dfs(
+	distances: &Vec<Vec<Option<usize>>>,
+	start_index: usize,
+	end_index: usize,
+	visited: &mut Vec<bool>,
+) -> Option<usize> {
 	let mut result = None;
 
 	for node in 0..distances.len() {
@@ -78,14 +88,26 @@ fn dfs(distances: &Vec<Vec<Option<usize>>>, start_index: usize, end_index: usize
 	return result;
 }
 
-fn sub_solve(grid: Vec<Vec<char>>, initial_pos: (usize, usize), end_pos: &(usize, usize), part2: bool) -> usize {
-	let mut intersections = grid[1..grid.len()-1]
+fn sub_solve(
+	grid: Vec<Vec<char>>,
+	initial_pos: (usize, usize),
+	end_pos: &(usize, usize),
+	part2: bool,
+) -> usize {
+	let mut intersections = grid[1..grid.len() - 1]
 		.iter()
 		.enumerate()
 		.map(|(r, line)| {
-			line[1..line.len()-1].iter()
+			line[1..line.len() - 1]
+				.iter()
 				.enumerate()
-				.filter_map(|(c, _)| if is_intersection(&grid, (r+1, c+1)) { Some((r+1, c+1)) } else { None })
+				.filter_map(|(c, _)| {
+					if is_intersection(&grid, (r + 1, c + 1)) {
+						Some((r + 1, c + 1))
+					} else {
+						None
+					}
+				})
 				.collect_vec()
 		})
 		.flatten()
@@ -108,7 +130,13 @@ fn sub_solve(grid: Vec<Vec<char>>, initial_pos: (usize, usize), end_pos: &(usize
 	}
 
 	let mut visited = vec![false; intersections.len()];
-	return dfs(&distances, intersections.len() - 2, intersections.len() - 1, &mut visited).unwrap();
+	return dfs(
+		&distances,
+		intersections.len() - 2,
+		intersections.len() - 1,
+		&mut visited,
+	)
+	.unwrap();
 }
 
 pub fn solve(inputs: Vec<String>) {
@@ -117,13 +145,45 @@ pub fn solve(inputs: Vec<String>) {
 		.map(|line| line.chars().collect_vec())
 		.collect_vec();
 
-	let start_pos = grid[0].iter().enumerate().find_map(|(c, &ch)| if ch == '.' { Some((0, c)) } else { None }).unwrap();
-	let end_pos = grid.last().unwrap().iter().enumerate().find_map(|(c, &ch)| if ch == '.' { Some((grid.len()-1, c)) } else { None }).unwrap();
+	let start_pos = grid[0]
+		.iter()
+		.enumerate()
+		.find_map(|(c, &ch)| if ch == '.' { Some((0, c)) } else { None })
+		.unwrap();
+	let end_pos = grid
+		.last()
+		.unwrap()
+		.iter()
+		.enumerate()
+		.find_map(|(c, &ch)| {
+			if ch == '.' {
+				Some((grid.len() - 1, c))
+			} else {
+				None
+			}
+		})
+		.unwrap();
 
 	// Fill in the starting point and start our DFS from the next row to avoid having to deal with boundary conditions. Also, add 2 to the result to account for the starting and ending points
 	grid[start_pos.0][start_pos.1] = '#';
 	grid[end_pos.0][end_pos.1] = '#';
 
-	println!("Part 1: {}", sub_solve(grid.clone(), (start_pos.0 + 1, start_pos.1), &(end_pos.0 - 1, end_pos.1), /*part2=*/false) + 2);
-	println!("Part 2: {}", sub_solve(grid.clone(), (start_pos.0 + 1, start_pos.1), &(end_pos.0 - 1, end_pos.1), /*part2=*/true) + 2);
+	println!(
+		"Part 1: {}",
+		sub_solve(
+			grid.clone(),
+			(start_pos.0 + 1, start_pos.1),
+			&(end_pos.0 - 1, end_pos.1),
+			/*part2=*/ false
+		) + 2
+	);
+	println!(
+		"Part 2: {}",
+		sub_solve(
+			grid.clone(),
+			(start_pos.0 + 1, start_pos.1),
+			&(end_pos.0 - 1, end_pos.1),
+			/*part2=*/ true
+		) + 2
+	);
 }
